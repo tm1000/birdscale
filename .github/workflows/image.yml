@@ -1,8 +1,14 @@
 name: image
 
-# Publishes ghcr.io/<owner>/<repo>:
+# Publishes ghcr.io/<owner>/<repo> and, when configured, Docker Hub:
 #   tag v1.2.3  -> 1.2.3, 1.2, 1 (the 1 is skipped for 0.x) and latest
 #   push to main -> main and sha-<short>
+#
+# Docker Hub is optional. To enable it, set in the repo settings:
+#   variable DOCKERHUB_USERNAME    Docker Hub user that owns the access token
+#   variable DOCKERHUB_REPOSITORY  e.g. myuser/birdscale
+#   secret   DOCKERHUB_TOKEN       Docker Hub access token with Read & Write scope
+# With DOCKERHUB_REPOSITORY unset, only GHCR is published.
 on:
   push:
     branches: [main]
@@ -36,10 +42,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - if: vars.DOCKERHUB_REPOSITORY != ''
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
+        with:
+          registry: docker.io
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - id: meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
-          images: ghcr.io/${{ github.repository }}
+          # The second line is empty (and ignored) when Docker Hub isn't configured.
+          images: |
+            ghcr.io/${{ github.repository }}
+            ${{ vars.DOCKERHUB_REPOSITORY != '' && format('docker.io/{0}', vars.DOCKERHUB_REPOSITORY) || '' }}
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
