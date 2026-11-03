@@ -193,8 +193,8 @@ BS_LIVE_NETLINK=1 go test ./internal/rtwatch -run Live -v   # needs CAP_NET_ADMI
   plus a self-hosted NetBird, testing tailnet → bridge → NetBird traffic. CI covers only
   gofmt, vet, `go test -race`, staticcheck and a docker build. Live behaviour (logins,
   route approval, SSO renew) was verified by hand on a test host.
-- **arm64:** the runtime image stage has only been built through `image.yml` under QEMU,
-  and hasn't been run on real arm64 hardware.
+- **arm64:** `image.yml` builds and publishes the multi-arch image (amd64 + arm64), but
+  the arm64 image hasn't been run on real arm64 hardware.
 - **IPv6:** unit-tested only. The format of `netbirdIpv6` with a dual-stack NetBird
   account is unverified; the parser accepts it with or without a prefix length.
 - **Publishing doesn't wait for CI:** `image.yml` doesn't depend on `ci.yml`. To gate it,
