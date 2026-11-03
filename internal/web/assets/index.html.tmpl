@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="30">
+<title>birdscale</title>
+<style>{{.CSS}}</style>
+</head>
+<body>
+<main>
+<h1>birdscale</h1>
+<div class="sub">Tailnet to NetBird bridge, version <b>{{.Version}}</b>. Signed in as <b>{{.Caller}}</b>. Read-only except the NetBird login button; refreshes every 30s.</div>
+
+{{if .SessionBanner}}<div class="banner {{if .SessionBad}}danger{{end}}">{{.SessionBanner}}{{if .NB.ReloginLabel}} Use the button in the NetBird section below.{{end}}</div>{{end}}
+{{range .Overlaps}}<div class="banner">Address overlap: {{.}}</div>{{end}}
+
+<section>
+<h2>Bridge <span class="{{if .Healthy}}ok{{else}}bad{{end}}">{{if .Healthy}}healthy{{else}}unhealthy{{end}}</span></h2>
+<dl>
+<dt>Uptime</dt><dd>{{.Uptime}}</dd>
+<dt>Last healthy</dt><dd>{{.LastHealthy}}</dd>
+<dt>Routes computed</dt><dd>{{if .RoutesComputed}}{{if .RoutesOverride}}from BS_ROUTES (override){{else}}from NetBird{{end}}{{else}}<span class="warn">not yet (waiting for NetBird)</span>{{end}}</dd>
+<dt>Desired routes</dt><dd>{{range .Desired}}<code>{{.}}</code> {{else}}none{{end}}</dd>
+<dt>Advertised routes</dt><dd>{{range .Advertised}}<code>{{.}}</code> {{else}}none{{end}}</dd>
+{{if .Skipped}}<dt>Skipped entries</dt><dd>{{range .Skipped}}<code>{{.}}</code> {{end}}<span class="sub">(domain names and default routes; domain resources are learned as /32s, see Route sync)</span></dd>{{end}}
+</dl>
+{{range .Warnings}}<div class="banner">{{.}}</div>{{end}}
+<h3>Health checks</h3>
+<div class="scroll"><table><tr><th>Check</th><th>Result</th><th>Detail</th></tr>
+{{range .Checks}}<tr><td>{{.Name}}</td><td class="{{if .OK}}ok{{else}}bad{{end}}">{{if .OK}}ok{{else}}failing{{end}}</td><td>{{.Reason}}</td></tr>{{end}}
+</table></div>
+<h3>nftables (inet birdscale) {{if not .NFTPresent}}<span class="bad">missing</span>{{end}}</h3>
+{{if .NFTCounters}}<div class="scroll"><table><tr><th>Chain</th><th>Rule</th><th>Packets</th><th>Bytes</th></tr>
+{{range .NFTCounters}}<tr><td>{{.Chain}}</td><td>{{.Comment}}</td><td>{{.Packets}}</td><td>{{.Bytes}}</td></tr>{{end}}</table></div>{{end}}
+</section>
+
+<section id="routes">
+<h2>Route sync <span class="{{if .Sync.Err}}bad{{else if .Sync.Pending}}warn{{else}}ok{{end}}">{{if .Sync.Err}}error{{else if .Sync.Pending}}{{.Sync.Pending}} pending{{else}}in sync{{end}}</span></h2>
+{{if .Sync.Err}}<div class="banner danger">{{.Sync.Err}}</div>{{end}}
+<dl>
+<dt>Last sync</dt><dd>{{.Sync.LastSync}} ({{.Sync.Syncs}} runs)</dd>
+<dt>Last change</dt><dd>{{.Sync.LastChange}} ({{.Sync.Changes}} changes)</dd>
+<dt>Domain /32s seen</dt><dd>{{.Sync.Learned}} host route(s) in NetBird's table</dd>
+</dl>
+{{if .Sync.Rows}}<div class="scroll"><table><tr><th>Route</th><th>Origin</th><th>Advertised</th><th>Approved</th></tr>
+{{range .Sync.Rows}}<tr><td><code>{{.Prefix}}</code></td><td>{{.Origin}}</td><td class="{{if .Advertised}}ok{{else}}warn{{end}}">{{if .Advertised}}yes{{else}}pending{{end}}</td><td class="{{if .Approved}}ok{{else}}warn{{end}}">{{if .Approved}}yes{{else}}{{if .Advertised}}awaiting approval{{else}}-{{end}}{{end}}</td></tr>{{end}}</table></div>{{else}}<div class="sub">nothing desired yet</div>{{end}}
+<h3>Domain-resource pre-warm ({{.DomainRefresh}})</h3>
+{{if .Prewarm}}<div class="scroll"><table><tr><th>Domain</th><th>Result</th><th>Last error</th><th>Addresses</th><th>Last attempt</th></tr>
+{{range .Prewarm}}<tr><td><code>{{.Domain}}</code></td><td class="{{.Class}}">{{.Result}}</td><td>{{.Err}}</td><td>{{.Addrs}}</td><td>{{.Age}}</td></tr>{{end}}</table></div>{{else}}<div class="sub">no domain resources</div>{{end}}
+</section>
+
+<section id="dns">
+<h2>DNS forwarder <span class="{{if .DNS.Enabled}}ok{{else}}warn{{end}}">{{if .DNS.Enabled}}enabled{{else}}disabled{{end}}</span></h2>
+{{if .DNS.Enabled}}<dl>
+<dt>Listening</dt><dd>{{.DNS.Listening}}</dd>
+<dt>Upstream</dt><dd>{{.DNS.Upstream}}</dd>
+<dt>Forwards</dt><dd>{{.DNS.Filter}}</dd>
+<dt>Route wait</dt><dd>{{.DNS.RouteWait}}</dd>
+</dl>
+<div class="scroll"><table><tr><th>Counter</th><th>Value</th></tr>
+<tr><td>Queries (udp / tcp)</td><td>{{.DNS.Queries}} ({{.DNS.UDP}} / {{.DNS.TCP}})</td></tr>
+<tr><td>Forwarded</td><td>{{.DNS.Forwarded}}</td></tr>
+<tr><td>Refused (outside BS_DNS_DOMAINS)</td><td>{{.DNS.Refused}}</td></tr>
+<tr><td>Failed (SERVFAIL)</td><td>{{.DNS.Failed}}</td></tr>
+<tr><td>Malformed</td><td>{{.DNS.Malformed}}</td></tr>
+<tr><td>Truncated replies</td><td>{{.DNS.Truncated}}</td></tr>
+<tr><td>Held for a route (ok / timed out)</td><td>{{.DNS.RouteWaits}} ({{.DNS.RouteWaitOK}} / {{.DNS.RouteWaitTimeout}})</td></tr>
+</table></div>{{else}}<div class="sub">Set BS_DNS=true to run it.</div>{{end}}
+</section>
+
+<section>
+<h2>Tailscale <span class="{{if eq .TS.State "Running"}}ok{{else}}warn{{end}}">{{.TS.State}}</span></h2>
+{{if .TS.Err}}<div class="banner">tailscaled: {{.TS.Err}}</div>{{end}}
+{{if .TS.AuthURL}}<div class="banner">Login required: <a href="{{.TS.AuthURL}}">{{.TS.AuthURL}}</a></div>{{end}}
+{{if eq .TS.State "NeedsMachineAuth"}}<div class="banner">Waiting for an admin to approve this device.</div>{{end}}
+<dl>
+<dt>Hostname</dt><dd>{{.TS.Hostname}}</dd>
+<dt>DNS name</dt><dd>{{.TS.DNSName}}</dd>
+<dt>Tailscale IPs</dt><dd>{{range .TS.IPs}}<code>{{.}}</code> {{end}}</dd>
+<dt>Tags</dt><dd>{{range .TS.Tags}}<code>{{.}}</code> {{else}}none{{end}}</dd>
+<dt>Key expiry</dt><dd>{{.TS.KeyExpiry}}</dd>
+<dt>Accept routes</dt><dd>{{.TS.AcceptRoutes}}</dd>
+</dl>
+<h3>Advertised routes</h3>
+{{if .TS.Routes}}<div class="scroll"><table><tr><th>Route</th><th>Approved</th></tr>
+{{range .TS.Routes}}<tr><td><code>{{.Prefix}}</code></td><td class="{{if .Approved}}ok{{else}}warn{{end}}">{{if .Approved}}approved{{else}}pending approval{{end}}</td></tr>{{end}}</table></div>{{else}}<div class="sub">none</div>{{end}}
+</section>
+
+<section id="netbird">
+<h2>NetBird <span class="{{if .NB.Connected}}ok{{else}}warn{{end}}">{{.NB.State}}</span></h2>
+{{if .NB.Err}}<div class="banner">netbird: {{.NB.Err}}</div>{{end}}
+{{if .NB.LoginURL}}<div class="banner">Login required. Open <a href="{{.NB.LoginURL}}">{{.NB.LoginURL}}</a> and approve this peer.</div>{{end}}
+{{if .NB.LoginProgress}}<div class="banner">{{.NB.LoginProgress}}.</div>{{end}}
+{{if .NB.LoginResult}}<div class="sub">Last renewal: {{.NB.LoginResult}}</div>{{end}}
+{{if .NB.ReloginLabel}}<form method="post" action="/netbird/relogin" class="act">
+<input type="hidden" name="csrf" value="{{.CSRF}}">
+<button type="submit">{{.NB.ReloginLabel}}</button> <span class="sub">{{.NB.ReloginHelp}}</span>
+</form>{{end}}
+<dl>
+<dt>Management</dt><dd><span class="{{if .NB.Mgmt.OK}}ok{{else}}bad{{end}}">{{.NB.Mgmt.Text}}</span></dd>
+<dt>Signal</dt><dd><span class="{{if .NB.Signal.OK}}ok{{else}}bad{{end}}">{{.NB.Signal.Text}}</span></dd>
+<dt>Relays</dt><dd>{{.NB.RelaySummary}}</dd>
+<dt>Peer IP</dt><dd><code>{{.NB.IP}}</code></dd>
+<dt>Interface</dt><dd>{{.NB.Interface}}</dd>
+<dt>Session expires</dt><dd>{{.NB.SessionExpiry}}</dd>
+</dl>
+<h3>Peers ({{.NB.PeersConnected}} of {{.NB.PeersTotal}} connected)</h3>
+{{if .NB.Peers}}<div class="scroll"><table><tr><th>Peer</th><th>IP</th><th>Status</th><th>Path</th><th>Last handshake</th></tr>
+{{range .NB.Peers}}<tr><td>{{.FQDN}}</td><td><code>{{.IP}}</code></td><td>{{.Status}}</td><td>{{.Path}}</td><td>{{.Handshake}}</td></tr>{{end}}</table></div>{{else}}<div class="sub">none</div>{{end}}
+<h3>Received networks</h3>
+{{if .NB.Networks}}<div class="scroll"><table><tr><th>Network</th><th>Kind</th></tr>
+{{range .NB.Networks}}<tr><td><code>{{.Value}}</code></td><td>{{.Kind}}</td></tr>{{end}}</table></div>{{else}}<div class="sub">none</div>{{end}}
+</section>
+</main>
+</body>
+</html>

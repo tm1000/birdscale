@@ -1,0 +1,39 @@
+# Example deployment. Copy .env.example to .env and fill it in.
+name: birdscale
+
+services:
+  birdscale:
+    # Published multi-arch image (amd64, arm64). To build locally instead:
+    #   BIRDSCALE_IMAGE=birdscale:local docker compose build
+    image: ${BIRDSCALE_IMAGE:-ghcr.io/tm1000/birdscale:latest}
+    build:
+      context: .
+      args:
+        VERSION: ${BIRDSCALE_VERSION:-dev}
+    container_name: birdscale
+    hostname: ${TS_HOSTNAME:-birdscale}
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 30s
+    cap_add: [NET_ADMIN]
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    sysctls:
+      net.ipv4.ip_forward: 1
+      net.ipv6.conf.all.forwarding: 1
+      net.ipv4.conf.all.src_valid_mark: 1
+    ports:
+      # Host side may differ (e.g. when the host already runs tailscaled on 41641);
+      # container side must match TS_PORT / NB_PORT.
+      - "${TS_HOST_PORT:-41641}:${TS_PORT:-41641}/udp"   # tailscale direct
+      - "${NB_HOST_PORT:-51820}:${NB_PORT:-51820}/udp"   # netbird direct
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - ts-state:/var/lib/tailscale
+      - nb-state:/etc/netbird
+
+volumes:
+  ts-state: {}
+  nb-state: {}

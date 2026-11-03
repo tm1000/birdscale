@@ -1,0 +1,43 @@
+:root {
+  --bg: #f6f7f9; --fg: #1b1f24; --muted: #5b6672; --card: #ffffff; --border: #d8dde3;
+  --ok: #1a7f37; --warn: #9a6700; --bad: #cf222e; --accent: #0969da; --code: #eef1f4;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1318; --fg: #e6e9ed; --muted: #97a1ad; --card: #171c22; --border: #2b333c;
+    --ok: #3fb950; --warn: #d29922; --bad: #f85149; --accent: #58a6ff; --code: #1f262e;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; padding: 16px; background: var(--bg); color: var(--fg);
+  font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+main { max-width: 1000px; margin: 0 auto; }
+h1 { font-size: 1.4rem; margin: 0 0 4px; }
+h2 { font-size: 1.05rem; margin: 0 0 10px; }
+.sub { color: var(--muted); margin-bottom: 16px; }
+section { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 16px; }
+dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 0; }
+dt { color: var(--muted); }
+dd { margin: 0; word-break: break-word; }
+table { border-collapse: collapse; width: 100%; margin-top: 6px; }
+th, td { text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--border); font-size: 0.92rem; vertical-align: top; }
+th { color: var(--muted); font-weight: 600; }
+code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em; background: var(--code); padding: 1px 4px; border-radius: 4px; }
+.ok { color: var(--ok); font-weight: 600; }
+.warn { color: var(--warn); font-weight: 600; }
+.bad { color: var(--bad); font-weight: 600; }
+.banner { border-left: 4px solid var(--warn); background: var(--code); padding: 8px 12px; margin: 10px 0; border-radius: 4px; }
+a { color: var(--accent); }
+h3 { font-size: 0.95rem; margin: 14px 0 4px; color: var(--muted); }
+.banner.danger { border-left-color: var(--bad); }
+.scroll { overflow-x: auto; }
+form.act { margin: 10px 0; }
+button { font: inherit; padding: 8px 14px; border-radius: 6px; border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; min-height: 40px; }
+button:hover { filter: brightness(1.1); }
+@media (max-width: 600px) {
+  body { padding: 10px; }
+  section { padding: 12px; }
+  dl { grid-template-columns: 1fr; gap: 0; }
+  dt { margin-top: 8px; font-size: 0.85rem; }
+  th, td { padding: 4px 6px; font-size: 0.85rem; }
+}

@@ -1,0 +1,16 @@
+# Dependabot keeps the GitHub Actions in .github/workflows up to date.
+# Actions are pinned by full commit SHA with a "# vX.Y.Z" comment; Dependabot bumps
+# the SHA and rewrites the version comment. Everything else (Go modules, base images,
+# tailscale/netbird releases) is handled by Renovate (renovate.json).
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: ci
+    labels: [dependencies, github-actions]

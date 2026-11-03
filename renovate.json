@@ -1,0 +1,57 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "enabledManagers": [
+    "gomod",
+    "dockerfile",
+    "custom.regex"
+  ],
+  "postUpdateOptions": [
+    "gomodTidy"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Pinned tailscale and netbird releases in the Dockerfile (ARG lines under a '# renovate:' comment)",
+      "managerFilePatterns": [
+        "/(^|/)Dockerfile$/"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>\\S+)(?: extractVersion=(?<extractVersion>\\S+))?\\s+ARG [A-Z_]+=(?<currentValue>\\S+)"
+      ]
+    },
+    {
+      "customType": "regex",
+      "description": "staticcheck version pinned in the CI workflow (STATICCHECK_VERSION)",
+      "managerFilePatterns": [
+        "/^\\.github/workflows/ci\\.yml$/"
+      ],
+      "matchStrings": [
+        "STATICCHECK_VERSION: (?<currentValue>v\\S+)"
+      ],
+      "depNameTemplate": "honnef.co/go/tools",
+      "datasourceTemplate": "go"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "tailscale: the CLI/daemon release in the Dockerfile and the tailscale.com Go module move together in one PR",
+      "matchPackageNames": [
+        "tailscale/tailscale",
+        "tailscale.com"
+      ],
+      "groupName": "tailscale",
+      "groupSlug": "tailscale"
+    },
+    {
+      "description": "Base images: pin by digest",
+      "matchDatasources": [
+        "docker"
+      ],
+      "pinDigests": true
+    }
+  ],
+  "description": "GitHub Actions are updated by Dependabot (.github/dependabot.yml); Renovate handles Go modules, Dockerfile base images, pinned tailscale/netbird releases and the staticcheck pin."
+}
