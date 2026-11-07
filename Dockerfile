@@ -4,7 +4,7 @@
 # ---- build birdscaled --------------------------------------------------------
 # tailscale.com v1.104.4 requires Go >= 1.27.3 (checked: golang:1.27.3-trixie exists on Docker Hub).
 # Runs on the build host's architecture and cross-compiles (no QEMU needed for the Go build).
-FROM --platform=$BUILDPLATFORM golang:1.27.3-trixie AS build
+FROM --platform=$BUILDPLATFORM golang:1.27.3-trixie@sha256:af1bfc2614ebb1dbd31af514b78740fd678850e76498762b425ecee4c5c6ea80 AS build
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
@@ -20,7 +20,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH="${TARGETARCH:-amd64}" \
 
 # ---- fetch and verify the vendor binaries ------------------------------------
 # Only downloads and unpacks tarballs for $TARGETARCH, so it runs on the build host's architecture.
-FROM --platform=$BUILDPLATFORM debian:trixie-slim AS fetch
+FROM --platform=$BUILDPLATFORM debian:trixie-slim@sha256:a72b4433de1cf7d6bae0c4cee74d0547f58601a643b3375f070c51600d63b6b2 AS fetch
 # Exact pinned releases. Checked 2026-11-02:
 #   tailscale 1.104.4  https://pkgs.tailscale.com/stable/?mode=json
 #   netbird   0.82.0   https://github.com/netbirdio/netbird/releases/tag/v0.82.0
@@ -57,7 +57,7 @@ RUN set -eux; \
     install -m 0755 netbird /usr/local/bin/netbird
 
 # ---- runtime -----------------------------------------------------------------
-FROM debian:trixie-slim
+FROM debian:trixie-slim@sha256:a72b4433de1cf7d6bae0c4cee74d0547f58601a643b3375f070c51600d63b6b2
 ARG VERSION=dev
 LABEL org.opencontainers.image.title="birdscale" \
       org.opencontainers.image.description="Bridge a Tailscale tailnet to a NetBird network" \
