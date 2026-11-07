@@ -27,7 +27,7 @@ FROM --platform=$BUILDPLATFORM debian:trixie-slim AS fetch
 # Renovate bumps these (see renovate.json). Keep TAILSCALE_VERSION equal to the tailscale.com
 # module version in go.mod (CI checks this). No checksum to edit: both are fetched at build time below.
 # renovate: datasource=github-releases depName=tailscale/tailscale extractVersion=^v(?<version>.+)$
-ARG TAILSCALE_VERSION=1.104.4
+ARG TAILSCALE_VERSION=1.104.5
 # renovate: datasource=github-releases depName=netbirdio/netbird extractVersion=^v(?<version>.+)$
 ARG NETBIRD_VERSION=0.82.0
 ARG TARGETARCH
