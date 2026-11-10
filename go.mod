@@ -6,7 +6,7 @@ require (
 	github.com/miekg/dns v1.1.73
 	github.com/prometheus/client_golang v1.25.0
 	github.com/vishvananda/netlink v1.3.1
-	golang.org/x/sys v0.49.0
+	golang.org/x/sys v0.50.0
 	tailscale.com v1.104.4
 )
 
