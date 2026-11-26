@@ -4,7 +4,7 @@
 # ---- build birdscaled --------------------------------------------------------
 # tailscale.com v1.104.4 requires Go >= 1.27.3 (checked: golang:1.27.3-trixie exists on Docker Hub).
 # Runs on the build host's architecture and cross-compiles (no QEMU needed for the Go build).
-FROM --platform=$BUILDPLATFORM golang:1.27.3-trixie AS build
+FROM --platform=$BUILDPLATFORM golang:1.27.4-trixie@sha256:430985542100b871e108ccc00e8dcc5eef08ca14ee5825e98ebf563d8ffec4ee AS build
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
