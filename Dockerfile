@@ -29,7 +29,7 @@ FROM --platform=$BUILDPLATFORM debian:trixie-slim AS fetch
 # renovate: datasource=github-releases depName=tailscale/tailscale extractVersion=^v(?<version>.+)$
 ARG TAILSCALE_VERSION=1.104.4
 # renovate: datasource=github-releases depName=netbirdio/netbird extractVersion=^v(?<version>.+)$
-ARG NETBIRD_VERSION=0.82.0
+ARG NETBIRD_VERSION=0.84.0
 ARG TARGETARCH
 RUN apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates curl \
